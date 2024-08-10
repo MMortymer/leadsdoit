@@ -33,7 +33,7 @@ class CreateApiToken extends Command
             return 1;
         }
 
-        $token = $user->createToken($this->argument('token_name'));
+        $token = $user->createToken($this->argument('token_name'), ['read']);
 
         $this->info("API token created successfully: " . $token->plainTextToken);
         return 0;

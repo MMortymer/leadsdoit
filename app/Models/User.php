@@ -51,6 +51,10 @@ class User extends Authenticatable
 
     /**
      * Override of HasApiTokens trait method to get 32 char token final length
+     * Note that real token length with additional sanctum prefixes can be >32 characters in the end
+     * In this case createToken method may require updates
+     * 
+     * 
      * Create a new personal access token for the user.
      *
      * @param  string  $name
