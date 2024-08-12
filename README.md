@@ -1,66 +1,188 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Weather Microservice
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Overview
 
-## About Laravel
+This microservice fetches and stores hourly temperature data for a specified city and provides an API to retrieve historical temperature data. It's built using the Laravel framework and runs within Docker containers.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+-   Fetches temperature data hourly for a specified city (configurable via environment variables).
+-   Stores temperature data in a SQLite database.
+-   Provides an API endpoint to retrieve temperature data for a specific day.
+-   Uses token-based authentication with Laravel Sanctum.
+-   Includes Docker configuration for easy setup and deployment.
+-   Runs scheduled tasks using Laravel's built-in scheduler, managed by Docker.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Requirements
 
-## Learning Laravel
+-   Docker and Docker Compose
+-   PHP 8.2+ (for local development)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Project Structure
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Key files and directories:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+-   `app/Console/Commands/FetchTemperature.php`: Command to fetch temperature data.
+-   `app/Http/Controllers/Api/V1/TemperatureController.php`: API controller for temperature data.
+-   `app/Models/User.php`: User model with custom token generation.
+-   `routes/api.php`: API route definitions.
+-   `routes/console.php`: Scheduled task definitions.
+-   `database/migrations/`: Database migration files.
+-   `Dockerfile`, `docker-compose.yml`, and `nginx/nginx.conf`: Docker configuration files.
 
-## Laravel Sponsors
+## Setup
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Local Setup
 
-### Premium Partners
+1. Clone the repository:
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+    ```bash
+    git clone <repository-url>
+    cd weather-microservice
+    ```
 
-## Contributing
+2. Install dependencies:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+    ```bash
+    composer install
+    ```
 
-## Code of Conduct
+3. Install npm dependencies
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+    ```bash
+    npm install
+    ```
 
-## Security Vulnerabilities
+4. Build Vite assets
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+    ```bash
+    npm run build
+    ```
+
+5. Copy the `.env.example` file to `.env` and configure your environment variables. Use your API key for `OPENWEATHERMAP_API_KEY`:
+
+    ```bash
+    cp .env.example .env
+    ```
+
+6. Generate an application key:
+
+    ```bash
+    php artisan key:generate
+    ```
+
+7. Run database migrations:
+
+    ```bash
+    php artisan migrate
+    ```
+
+8. Create a user and generate an API token:
+
+    ```bash
+    php artisan db:seed
+    php artisan api:token test@example.com read_token
+    ```
+
+    Make sure to save the generated token for API requests.
+
+### Docker Setup
+
+1. Ensure Docker and Docker Compose are installed on your system.
+
+2. Build and start the Docker containers:
+
+    ```bash
+    docker-compose up -d --build
+    ```
+
+3. The application should now be running at `http://localhost:8000`.
+
+4. To run commands inside the Docker container:
+
+    ```bash
+    docker-compose exec app php artisan <command>
+    ```
+
+### Running Scheduled Tasks
+
+Scheduled tasks are handled by Laravel's scheduler, which is run continuously within a Docker service defined in `docker-compose.yml`.
+The `task` service runs the scheduler, so all tasks defined in `routes/console.php` will be executed at their scheduled times.
+
+To monitor the scheduler's output, you can check the logs of the `task` service:
+
+```bash
+docker-compose logs -f task
+```
+
+## Usage
+
+### Fetching Temperature Data
+
+The microservice is set up to fetch temperature data hourly. You can manually trigger a fetch using:
+
+```
+php artisan temperature:fetch
+```
+
+Or, if using Docker:
+
+```
+docker-compose exec app php artisan temperature:fetch
+```
+
+### Retrieving Temperature Data
+
+To retrieve temperature data for a specific day, make a GET request to the `/api/v1/temperatures` endpoint with the following parameters:
+
+-   `day`: The date for which to retrieve temperatures (format: Y-m-d)
+
+Include your API token in the Authorization header:
+
+```
+Authorization: Bearer YOUR_API_TOKEN
+```
+
+Example curl request:
+
+```
+curl -i "http://127.0.0.1:8000/api/v1/temperatures?day=2024-08-12" -H "Authorization: Bearer YOUR_API_TOKEN"
+
+```
+
+## Testing
+
+To run the test suite:
+
+```
+php artisan test
+```
+
+Or, if using Docker:
+
+```
+docker-compose exec app php artisan test
+```
+
+## Implementation Details
+
+-   The project uses Laravel Sanctum for API authentication.
+-   Custom token generation is implemented in the User model to create 32-character tokens.
+-   Scheduled tasks are defined in `routes/console.php` for better organization.
+-   The `FetchTemperature` command is scheduled to run hourly.
+-   SQLite is used as the database for simplicity in this test task.
+
+## Possible Improvements
+
+1. Implement caching to reduce database queries for frequently accessed data.
+2. Add more comprehensive error handling and logging.
+3. Implement rate limiting on the API to prevent abuse.
+4. Add unit and integration tests for better code coverage.
+5. Implement a front-end dashboard for visualizing temperature data.
+6. Add support for multiple cities.
+7. Implement data validation and sanitization for incoming API requests.
+8. Consider using a more robust database solution for production environments.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
