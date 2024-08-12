@@ -12,6 +12,13 @@ services:
             - ./:/var/www
         networks:
             - laravel
+        depends_on:
+            - cron
+    cron:
+        image: alpine:latest
+        volumes:
+            - ./:/var/www
+        command: "crond -f -d 8"
 
     nginx:
         image: nginx:alpine
