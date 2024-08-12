@@ -13,6 +13,15 @@ services:
         networks:
             - laravel
 
+    task:
+        image: laravel-app
+        command: ["php", "/var/www/artisan", "schedule:work"]
+        working_dir: /var/www
+        volumes:
+            - ./:/var/www
+        networks:
+            - laravel
+
     nginx:
         image: nginx:alpine
         container_name: laravel-nginx
