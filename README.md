@@ -59,7 +59,7 @@ Key files and directories:
     npm run build
     ```
 
-5. Copy the `.env.example` file to `.env` and configure your environment variables. Use your API key for `OPENWEATHERMAP_API_KEY`:
+5. Copy the `.env.example` file to `.env` and configure your environment variables. **Use your API key for `OPENWEATHERMAP_API_KEY`**:
 
     ```bash
     cp .env.example .env
@@ -90,29 +90,19 @@ Key files and directories:
 
 1. Ensure Docker and Docker Compose are installed on your system.
 
-2. Build Docker containers:
+2. Build and start the Docker containers:
 
     ```bash
     docker-compose build
     ```
 
-3. Enter the task container
-
     ```bash
-     docker-compose exec task bash
-     #change ownership and permissions of the database directory and its contents
-     chown -R www-data:www-data database/
-     chmod -R 775 database/
-     exit
+    docker-compose up -d
     ```
 
-4. Start the Docker containers
-    ```bash
-     docker-compose up -d
-    ```
-5. The application should now be running at `http://localhost:8000`.
+3. The application should now be running at `http://localhost:8000`.
 
-6. To run commands inside the Docker container:
+4. To run commands inside the Docker container:
 
     ```bash
     docker-compose exec app php artisan <command>
