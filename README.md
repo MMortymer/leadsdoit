@@ -90,15 +90,29 @@ Key files and directories:
 
 1. Ensure Docker and Docker Compose are installed on your system.
 
-2. Build and start the Docker containers:
+2. Build Docker containers:
 
     ```bash
-    docker-compose up -d --build
+    docker-compose build
     ```
 
-3. The application should now be running at `http://localhost:8000`.
+3. Enter the task container
 
-4. To run commands inside the Docker container:
+    ```bash
+     docker-compose exec task bash
+     #change ownership and permissions of the database directory and its contents
+     chown -R www-data:www-data database/
+     chmod -R 775 database/
+     exit
+    ```
+
+4. Start the Docker containers
+    ```bash
+     docker-compose up -d
+    ```
+5. The application should now be running at `http://localhost:8000`.
+
+6. To run commands inside the Docker container:
 
     ```bash
     docker-compose exec app php artisan <command>
