@@ -39,12 +39,11 @@ RUN php artisan key:generate
 # Set permissions for storage and bootstrap/cache
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# Create database directory if it doesn't exist
-RUN mkdir -p /var/www/database
-
-# Set permissions for the database directory
-RUN chown -R www-data:www-data /var/www/database && \
-    chmod -R 775 /var/www/database
+# Create database directory and file, set permissions
+RUN mkdir -p /var/www/database && \
+    touch /var/www/database/database.sqlite && \
+    chown -R www-data:www-data /var/www/storage /var/www/database && \
+    chmod -R 775 /var/www/storage /var/www/database
 
 # Expose port 9000 and start php-fpm server
 EXPOSE 9000

@@ -15,7 +15,14 @@ services:
 
     task:
         image: laravel-app
-        command: ["php", "/var/www/artisan", "schedule:work"]
+        command: >
+            bash -c "
+            mkdir -p /var/www/database &&
+            touch /var/www/database/database.sqlite &&
+            chown -R www-data:www-data /var/www/storage /var/www/database &&
+            chmod -R 775 /var/www/storage /var/www/database &&
+            php /var/www/artisan schedule:work
+            "
         working_dir: /var/www
         volumes:
             - ./:/var/www
