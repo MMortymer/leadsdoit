@@ -2,29 +2,23 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Temperature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
+use App\Repositories\TemperatureRepositoryInterface;
 
 class FetchTemperature extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'temperature:fetch';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Fetch current temperature for the specified city';
 
-    /**
-     * Execute the console command.
-     */
+    private $temperatureRepository;
+
+    public function __construct(TemperatureRepositoryInterface $temperatureRepository)
+    {
+        parent::__construct();
+        $this->temperatureRepository = $temperatureRepository;
+    }
+
     public function handle()
     {
         $city = config('services.openweathermap.city', 'Kyiv');
@@ -38,7 +32,7 @@ class FetchTemperature extends Command
 
         if ($response->successful()) {
             $data = $response->json();
-            Temperature::create([
+            $this->temperatureRepository->createTemperature([
                 'city' => $city,
                 'temperature' => $data['main']['temp'],
                 'recorded_at' => now(),
