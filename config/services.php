@@ -40,4 +40,8 @@ return [
         'city' => env('WEATHER_CITY', 'Kyiv'),
     ],
 
+    'api' => [
+        'token' => env('API_TOKEN'),
+    ],
+
 ];
