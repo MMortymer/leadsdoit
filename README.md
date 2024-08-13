@@ -2,14 +2,14 @@
 
 ## Overview
 
-This microservice fetches and stores hourly temperature data for a specified city and provides an API to retrieve historical temperature data. It's built using the Laravel framework and runs within Docker containers.
+This microservice fetches and stores hourly temperature data for a specified city and provides an API to retrieve historical temperature data. It's built using the Laravel 11 framework, adhering to SOLID principles, and runs within Docker containers.
 
 ## Features
 
 -   Fetches temperature data hourly for a specified city (configurable via environment variables).
--   Stores temperature data in a SQLite database.
+-   Stores temperature data using a repository pattern for flexibility.
 -   Provides an API endpoint to retrieve temperature data for a specific day.
--   Uses token-based authentication with Laravel Sanctum.
+-   Uses custom token-based authentication.
 -   Includes Docker configuration for easy setup and deployment.
 -   Runs scheduled tasks using Laravel's built-in scheduler, managed by Docker.
 
@@ -24,10 +24,12 @@ Key files and directories:
 
 -   `app/Console/Commands/FetchTemperature.php`: Command to fetch temperature data.
 -   `app/Http/Controllers/Api/V1/TemperatureController.php`: API controller for temperature data.
--   `app/Models/User.php`: User model with custom token generation.
+-   `app/Repositories/TemperatureRepositoryInterface.php`: Interface for temperature data operations.
+-   `app/Repositories/EloquentTemperatureRepository.php`: Eloquent implementation of the repository.
+-   `app/Http/Middleware/ApiTokenMiddleware.php`: Custom token authentication middleware.
 -   `routes/api.php`: API route definitions.
 -   `routes/console.php`: Scheduled task definitions.
--   `database/migrations/`: Database migration files.
+-   `bootstrap/app.php`: Application bootstrap file with middleware and console kernel registrations.
 -   `Dockerfile`, `docker-compose.yml`, and `nginx/nginx.conf`: Docker configuration files.
 
 ## Setup
@@ -77,14 +79,11 @@ Key files and directories:
     php artisan migrate
     ```
 
-8. Create a user and generate an API token:
+8. Set up your API token in the `.env` file:
 
-    ```bash
-    php artisan db:seed
-    php artisan api:token test@example.com read_token
     ```
-
-    Make sure to save the generated token for API requests.
+    API_TOKEN=your32charactertoken
+    ```
 
 ### Docker Setup
 
@@ -141,17 +140,16 @@ To retrieve temperature data for a specific day, make a GET request to the `/api
 
 -   `day`: The date for which to retrieve temperatures (format: Y-m-d)
 
-Include your API token in the Authorization header:
+Include your API token in the x-token header:
 
 ```
-Authorization: Bearer YOUR_API_TOKEN
+x-token: YOUR_API_TOKEN
 ```
 
 Example curl request:
 
-```
-curl -i "http://127.0.0.1:8000/api/v1/temperatures?day=2024-08-12" -H "Authorization: Bearer YOUR_API_TOKEN"
-
+```bash
+curl -i "http://127.0.0.1:8000/api/v1/temperatures?day=2024-08-13" -H "x-token: YOUR_API_TOKEN"
 ```
 
 ## Testing
@@ -170,11 +168,11 @@ docker-compose exec app php artisan test
 
 ## Implementation Details
 
--   The project uses Laravel Sanctum for API authentication.
--   Custom token generation is implemented in the User model to create 32-character tokens.
+-   The project uses a custom API token middleware for authentication.
+-   Repository pattern is implemented for temperature data operations, adhering to SOLID principles.
+-   Dependency injection is used in controllers and commands for better testability and flexibility.
 -   Scheduled tasks are defined in `routes/console.php` for better organization.
--   The `FetchTemperature` command is scheduled to run hourly.
--   SQLite is used as the database for simplicity in this test task.
+-   The `FetchTemperature` command is scheduled to run hourly
 
 ## Possible Improvements
 
